@@ -190,6 +190,7 @@ namespace _Game.Line
                 _hasCollided = false;
                 _hasLostLifeForThisCollision = false;
                 if (_animation != null) _animation.VisualZOffset = 0f;
+                if (_materialHandler != null) _materialHandler.SetActiveColor();
                 ResetHeadCollision();
             }
         }
@@ -227,6 +228,11 @@ namespace _Game.Line
             }
 
             if (_hasCollided) return;
+
+            if (_materialHandler != null)
+            {
+                _materialHandler.SetSuccessColor();
+            }
 
             if (_lineManager != null)
             {
