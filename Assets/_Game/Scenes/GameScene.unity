@@ -730,7 +730,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.11764706, g: 0.16078432, b: 0.23137255, a: 0.95}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 0
@@ -1461,15 +1461,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4426761206483752972, guid: 6ada64ac7a7514849b368d274d552132, type: 3}
       propertyPath: m_BackGroundColor.b
-      value: 1
+      value: 0.16470589
       objectReference: {fileID: 0}
     - target: {fileID: 4426761206483752972, guid: 6ada64ac7a7514849b368d274d552132, type: 3}
       propertyPath: m_BackGroundColor.g
-      value: 1
+      value: 0.09019608
       objectReference: {fileID: 0}
     - target: {fileID: 4426761206483752972, guid: 6ada64ac7a7514849b368d274d552132, type: 3}
       propertyPath: m_BackGroundColor.r
-      value: 1
+      value: 0.05882353
       objectReference: {fileID: 0}
     - target: {fileID: 5768790214394524418, guid: 6ada64ac7a7514849b368d274d552132, type: 3}
       propertyPath: _padding

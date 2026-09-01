@@ -18,8 +18,23 @@ namespace SerapKeremGameKit._UI
 
         private void Awake()
         {
-            if (_restartButton != null) _restartButton.BindOnClick(this, OnRestartClicked);
-            if (_settingsButton != null) _settingsButton.BindOnClick(this, OnSettingsClicked);
+            if (_restartButton != null)
+            {
+                _restartButton.BindOnClick(this, OnRestartClicked);
+                if (_restartButton.GetComponent<UIButtonPressEffect>() == null)
+                {
+                    _restartButton.gameObject.AddComponent<UIButtonPressEffect>();
+                }
+            }
+
+            if (_settingsButton != null)
+            {
+                _settingsButton.BindOnClick(this, OnSettingsClicked);
+                if (_settingsButton.GetComponent<UIButtonPressEffect>() == null)
+                {
+                    _settingsButton.gameObject.AddComponent<UIButtonPressEffect>();
+                }
+            }
         }
 
         public override void Show(bool playSound = true)
@@ -87,7 +102,7 @@ namespace SerapKeremGameKit._UI
         public void SetLevelIndex(int levelIndex)
         {
             if (_levelText != null)
-                _levelText.text = $"Level {levelIndex + 1}";
+                _levelText.text = $"LEVEL {levelIndex + 1}";
         }
 
         public void UpdateTimeDisplay(float remainingTime)
