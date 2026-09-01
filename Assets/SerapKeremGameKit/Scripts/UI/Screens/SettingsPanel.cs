@@ -24,7 +24,14 @@ namespace SerapKeremGameKit._UI
 		{
 			if (_soundToggle != null) _soundToggle.onValueChanged.AddListener(OnSoundToggled);
 			if (_hapticToggle != null) _hapticToggle.onValueChanged.AddListener(OnHapticToggled);
-			if (_closeButton != null) _closeButton.BindOnClick(this, OnCloseClicked);
+			if (_closeButton != null)
+            {
+                _closeButton.BindOnClick(this, OnCloseClicked);
+                if (_closeButton.GetComponent<UIButtonPressEffect>() == null)
+                {
+                    _closeButton.gameObject.AddComponent<UIButtonPressEffect>();
+                }
+            }
 		}
 
 		protected override void OnDestroy()

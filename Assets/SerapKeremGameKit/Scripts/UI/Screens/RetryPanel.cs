@@ -11,8 +11,23 @@ namespace SerapKeremGameKit._UI
 
 		private void Awake()
 		{
-			if (_yesButton != null) _yesButton.BindOnClick(this, OnYes);
-			if (_noButton != null) _noButton.BindOnClick(this, OnNo);
+			if (_yesButton != null)
+            {
+                _yesButton.BindOnClick(this, OnYes);
+                if (_yesButton.GetComponent<UIButtonPressEffect>() == null)
+                {
+                    _yesButton.gameObject.AddComponent<UIButtonPressEffect>();
+                }
+            }
+
+			if (_noButton != null)
+            {
+                _noButton.BindOnClick(this, OnNo);
+                if (_noButton.GetComponent<UIButtonPressEffect>() == null)
+                {
+                    _noButton.gameObject.AddComponent<UIButtonPressEffect>();
+                }
+            }
 		}
 
 		protected override void OnDestroy()

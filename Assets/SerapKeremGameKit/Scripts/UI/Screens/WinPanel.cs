@@ -23,10 +23,18 @@ namespace SerapKeremGameKit._UI
 
         private int _pendingReward;
         private Sequence _pendingSequence;
+        private Sequence _entranceSequence;
 
         private void Awake()
         {
-			if (_nextButton != null) _nextButton.BindOnClick(this, OnNextClicked);
+			if (_nextButton != null)
+            {
+                _nextButton.BindOnClick(this, OnNextClicked);
+                if (_nextButton.GetComponent<UIButtonPressEffect>() == null)
+                {
+                    _nextButton.gameObject.AddComponent<UIButtonPressEffect>();
+                }
+            }
         }
 
 		protected override void OnDestroy()
@@ -38,6 +46,11 @@ namespace SerapKeremGameKit._UI
 				_pendingSequence.Kill();
 				_pendingSequence = null;
 			}
+            if (_entranceSequence != null && _entranceSequence.IsActive())
+            {
+                _entranceSequence.Kill();
+                _entranceSequence = null;
+            }
 		}
 
         public void Setup(int stars, int rewardedCoins, int totalCoins, UIRootController uiRoot)
@@ -48,7 +61,29 @@ namespace SerapKeremGameKit._UI
             _uiRoot = uiRoot;
             _pendingReward = rewardedCoins;
 
-            // Do not start animation here; start it on Next button
+            PlayEntranceSequence(stars);
+        }
+
+        private void PlayEntranceSequence(int starCount)
+        {
+            _entranceSequence?.Kill();
+            _entranceSequence = DOTween.Sequence()
+                .SetUpdate(true)
+                .SetAutoKill(true)
+                .SetLink(gameObject, LinkBehaviour.KillOnDestroy);
+
+            // Animate stars sequentially
+            GameObject[] stars = new GameObject[] { _star1, _star2, _star3 };
+            for (int i = 0; i < stars.Length; i++)
+            {
+                if (stars[i] != null && stars[i].activeSelf)
+                {
+                    Transform starT = stars[i].transform;
+                    starT.localScale = Vector3.zero;
+                    _entranceSequence.Insert(0.15f + (i * 0.1f), 
+                        starT.DOScale(Vector3.one, 0.25f).SetEase(Ease.OutBack));
+                }
+            }
         }
 
         private void OnTotalCoinStep(long value) { }
