@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: DefaultCompany
-  productName: SerapKeremGameKit
+  companyName: Aqib Mansoor
+  productName: TrickyArrow
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -165,9 +165,9 @@ PlayerSettings:
   androidMaxAspectRatio: 2.4
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: com.UnityTechnologies.com.unity.template.urpblank
-    Standalone: com.Unity-Technologies.com.unity.template.urp-blank
-    iPhone: com.Unity-Technologies.com.unity.template.urp-blank
+    Android: com.aqibmansoor.trickyarrow
+    Standalone: com.aqibmansoor.trickyarrow
+    iPhone: com.aqibmansoor.trickyarrow
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -861,14 +861,14 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: SerapKeremGameKit
+  metroPackageName: TrickyArrow
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: SerapKeremGameKit
+  metroApplicationDescription: TrickyArrow
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
@@ -939,11 +939,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 6fe44197-4f8b-4ba6-9fc1-21e0443e5050
+  cloudProjectId: 
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: SerapKeremGameKit
-  organizationId: serapkerem19
+  projectName: TrickyArrow
+  organizationId: 
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
