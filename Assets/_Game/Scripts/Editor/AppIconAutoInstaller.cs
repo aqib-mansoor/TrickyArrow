@@ -7,7 +7,7 @@ namespace _Game.Editor
     [InitializeOnLoad]
     public static class AppIconAutoInstaller
     {
-        private const string PrefKey = "TrickyArrow_AppIcon_Installed_V1";
+        private const string PrefKey = "TrickyArrow_AppIcon_Installed_V2";
 
         static AppIconAutoInstaller()
         {
@@ -55,13 +55,15 @@ namespace _Game.Editor
                     TextureImporter importer = AssetImporter.GetAtPath(assetRelativePath) as TextureImporter;
                     if (importer != null)
                     {
-                        importer.textureType = TextureImporterType.Default;
+                        importer.textureType = TextureImporterType.Sprite;
                         importer.isReadable = true;
                         importer.npotScale = TextureImporterNPOTScale.None;
                         importer.SaveAndReimport();
                     }
 
                     Texture2D iconTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetRelativePath);
+                    Sprite iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(assetRelativePath);
+
                     if (iconTexture != null)
                     {
                         PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new Texture2D[] { iconTexture }, IconKind.Any);
@@ -69,8 +71,12 @@ namespace _Game.Editor
                         PlayerSettings.SetIcons(NamedBuildTarget.iOS, new Texture2D[] { iconTexture }, IconKind.Any);
                         PlayerSettings.SetIcons(NamedBuildTarget.Standalone, new Texture2D[] { iconTexture }, IconKind.Any);
 
+                        // Configure Unity splash screen logo
+                        PlayerSettings.SplashScreenLogo splashLogo = PlayerSettings.SplashScreenLogo.Create(2.5f, iconSprite);
+                        PlayerSettings.SplashScreen.logos = new PlayerSettings.SplashScreenLogo[] { splashLogo };
+
                         EditorPrefs.SetBool(PrefKey, true);
-                        Debug.Log("<color=green>[TrickyArrow]</color> App Icon was automatically copied and set across PlayerSettings!");
+                        Debug.Log("<color=green>[TrickyArrow]</color> App Icon & Splash Screen logo successfully configured!");
                     }
                 }
                 catch (System.Exception ex)

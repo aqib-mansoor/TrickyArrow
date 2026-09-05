@@ -18,6 +18,7 @@ namespace SerapKeremGameKit._UI
         [SerializeField] private FailPanel _fail;
         [SerializeField] private SettingsPanel _settings;
         [SerializeField] private RetryPanel _retry;
+        [SerializeField] private SplashScreenPanel _splash;
 
         [Header("Data")]
         [SerializeField] private LevelConfig _fallbackConfig;
@@ -40,6 +41,7 @@ namespace SerapKeremGameKit._UI
             if (_fail == null) _fail = GetComponentInChildren<FailPanel>(true);
             if (_settings == null) _settings = GetComponentInChildren<SettingsPanel>(true);
             if (_retry == null) _retry = GetComponentInChildren<RetryPanel>(true);
+            if (_splash == null) _splash = GetComponentInChildren<SplashScreenPanel>(true);
 
             // Inject UIRoot into screens to avoid FindObjectOfType
             if (_hud != null) _hud.SetUIRoot(this);
@@ -47,7 +49,7 @@ namespace SerapKeremGameKit._UI
             if (_fail != null) _fail.SetUIRoot(this);
             if (_retry != null) _retry.SetUIRoot(this);
 
-            // Ensure startup state: only HUD hidden initially (will be shown in Start)
+            // Ensure startup state
             if (_win != null) _win.HideImmediate();
             if (_fail != null) _fail.HideImmediate();
             if (_settings != null) _settings.HideImmediate();
@@ -68,7 +70,18 @@ namespace SerapKeremGameKit._UI
         private void ApplyInitialState()
         {
             HideAll();
-            InitializeHUD();
+
+            if (_splash != null && _splash.ShouldShow)
+            {
+                _splash.PlaySplash(() =>
+                {
+                    InitializeHUD();
+                });
+            }
+            else
+            {
+                InitializeHUD();
+            }
         }
 
         public void InitializeHUD()
@@ -138,7 +151,6 @@ namespace SerapKeremGameKit._UI
             }
         }
 
-        
         private float CalculateCompletionTime(Level level)
         {
             if (level == null)
@@ -248,7 +260,6 @@ namespace SerapKeremGameKit._UI
             if (AudioManager.IsInitialized && !string.IsNullOrEmpty(_keyOnOpenSettings)) AudioManager.Instance.Play(_keyOnOpenSettings);
             if (HapticManager.IsInitialized) HapticManager.Instance.Play(HapticType.Selection);
         }
-
 
         public void UpdateTimeDisplay(float remainingTime)
         {
