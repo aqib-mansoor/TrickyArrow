@@ -26,6 +26,7 @@ namespace _Game.Line
         public LineRenderer LineRenderer => _lineRenderer;
         public LineAnimation Animation => _animation;
         public LineClick Click => _click;
+        public LineRendererHead LineHead => _lineHead;
         public bool IsInitialized { get; private set; }
         public bool IsClickable => !_hasCollided && (_animation == null || !_animation.IsPlaying || (_animation.IsPlaying && _animation.IsForward));
 
@@ -232,6 +233,17 @@ namespace _Game.Line
             if (_materialHandler != null)
             {
                 _materialHandler.SetSuccessColor();
+            }
+
+            if (_colliderSpawner != null)
+            {
+                _colliderSpawner.ClearSegments();
+            }
+
+            if (_lineHead != null)
+            {
+                DG.Tweening.DOTween.Kill(_lineHead.transform);
+                _lineHead.transform.DOScale(Vector3.zero, 0.15f).SetEase(DG.Tweening.Ease.InBack);
             }
 
             if (_lineManager != null)

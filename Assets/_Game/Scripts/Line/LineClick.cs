@@ -76,6 +76,15 @@ namespace _Game.Line
 
         if (_ownLine != null && !_ownLine.IsClickable)
             return;
+
+        // Tactile punch feedback on tap
+        if (_ownLine != null && _ownLine.LineHead != null)
+        {
+            DG.Tweening.DOTween.Kill(_ownLine.LineHead.transform);
+            _ownLine.LineHead.transform.DOPunchScale(Vector3.one * 0.25f, 0.15f, 10, 1)
+                .SetUpdate(true)
+                .SetLink(_ownLine.LineHead.gameObject, DG.Tweening.LinkBehaviour.KillOnDestroy);
+        }
         
         _lineDestroyer.StartCountdown();
         _animation.Play(forwardDirection: true);

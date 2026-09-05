@@ -140,12 +140,14 @@ namespace _Game.Line
             var count = line.positionCount;
             var lastPoint = line.GetPosition(count - 1);
 
-            lastPoint += _direction.normalized * (speed * Time.deltaTime);
+            // Snappy forward travel speed
+            float moveStep = speed * 1.15f * Time.deltaTime;
+            lastPoint += _direction.normalized * moveStep;
             line.SetPosition(count - 1, lastPoint);
 
             var tailPoint = line.GetPosition(0);
             var tailDirection = line.GetPosition(1) - tailPoint;
-            tailPoint += tailDirection.normalized * (speed * Time.deltaTime);
+            tailPoint += tailDirection.normalized * moveStep;
             line.SetPosition(0, tailPoint);
 
             OnLinePositionsChanged?.Invoke();
@@ -191,11 +193,12 @@ namespace _Game.Line
         {
             int lastIndex = line.positionCount - 1;
             Vector3 currentHeadPos = line.GetPosition(lastIndex);
-            Vector3 headMoveDir = -_direction.normalized;
             Vector3 originHeadPos = positionsOrigin[positionsOrigin.Length - 1];
 
             float distToOrigin = Vector2.Distance(currentHeadPos, originHeadPos);
-            float moveDist = speed * Time.deltaTime;
+            // Snappy dynamic spring retraction speed
+            float retractSpeed = Mathf.Max(speed * 1.4f, distToOrigin * 6f);
+            float moveDist = retractSpeed * Time.deltaTime;
 
             Vector3 newHeadPos;
 
