@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using SerapKeremGameKit._Logging;
 using SerapKeremGameKit._Utilities;
+using _Game;
 
 namespace SerapKeremGameKit._Managers
 {
@@ -20,13 +21,15 @@ namespace SerapKeremGameKit._Managers
             set { PlayerPrefs.SetInt(ProgressKey, value); SaveUtility.SaveImmediate(); }
         }
 
-        [Tooltip("Use random selection after tutorials are completed.")]
-        [SerializeField] private bool _useRandomSelection = true;
+        [Header("Procedural Level Settings")]
+        [Tooltip("When enabled, all levels are generated procedurally with mathematically guaranteed solutions and infinite scaling.")]
+        [SerializeField] private bool _useProceduralInfiniteLevels = true;
+        [SerializeField] private Level _proceduralBaseTemplate;
 
         [Title("Level Collections")]
         [ListDrawerSettings(Draggable = true, AlwaysExpanded = false)]
         [FormerlySerializedAs("_gameplayLevels")]
-        [SerializeField, Required] private Level[] _levels;
+        [SerializeField] private Level[] _levels;
 
         public Level ActiveLevelInstance { get; private set; }
         public int ProcessedLevelIndex { get; private set; }
@@ -34,10 +37,9 @@ namespace SerapKeremGameKit._Managers
         // Public accessors for external systems
         public Level[] GameplayLevels => _levels;
         public int GameplayLevelCount => _levels != null ? _levels.Length : 0;
+        public bool UseProceduralInfiniteLevels => _useProceduralInfiniteLevels;
 
         #endregion
-
-        // Events removed to keep template simple and robust
 
         #region Unity Lifecycle
 
@@ -64,9 +66,55 @@ namespace SerapKeremGameKit._Managers
 
         public void LoadCurrentLevel()
         {
-            var selection = ComputeLevelSelection();
-            ProcessedLevelIndex = selection.targetIndex;
-            InstantiateAndBegin(selection.selectedLevel);
+            int currentProgress = ActiveLevelNumber;
+            ProcessedLevelIndex = currentProgress;
+
+            if (_useProceduralInfiniteLevels)
+            {
+                InstantiateAndBeginProcedural(currentProgress);
+            }
+            else
+            {
+                var selection = ComputeLevelSelection();
+                ProcessedLevelIndex = selection.targetIndex;
+                InstantiateAndBegin(selection.selectedLevel);
+            }
+        }
+
+        private void InstantiateAndBeginProcedural(int levelNumber)
+        {
+            Level baseTemplate = _proceduralBaseTemplate;
+            if (baseTemplate == null)
+            {
+                baseTemplate = Resources.Load<Level>("Levels/Level_Base");
+            }
+
+            if (baseTemplate != null)
+            {
+                ActiveLevelInstance = Instantiate(baseTemplate);
+            }
+            else
+            {
+                GameObject newLevelGo = new GameObject($"Level {levelNumber}");
+                ActiveLevelInstance = newLevelGo.AddComponent<ProceduralLevel>();
+            }
+
+            // Configure Procedural component
+            ProceduralLevel procLevel = ActiveLevelInstance.GetComponent<ProceduralLevel>();
+            if (procLevel == null)
+            {
+                procLevel = ActiveLevelInstance.gameObject.AddComponent<ProceduralLevel>();
+            }
+            procLevel.SetLevelNumber(levelNumber);
+
+            ActiveLevelInstance.Load();
+            Time.timeScale = 1f;
+            if (SerapKeremGameKit._InputSystem.InputHandler.Instance != null)
+            {
+                SerapKeremGameKit._InputSystem.InputHandler.Instance.UnlockInput();
+            }
+            StateManager.Instance.SetLoading();
+            StartLevel();
         }
 
         private (Level selectedLevel, int targetIndex) ComputeLevelSelection()
@@ -77,27 +125,21 @@ namespace SerapKeremGameKit._Managers
 
         private (Level selectedLevel, int targetIndex) ResolveGameplaySelection(int adjustedProgress)
         {
+            if (_levels == null || _levels.Length == 0)
+            {
+                Level baseTemplate = Resources.Load<Level>("Levels/Level_Base");
+                return (baseTemplate, 1);
+            }
+
             int totalGameplayLevels = _levels.Length;
-            int calculatedIndex = ClampOrWrapIndex(adjustedProgress, totalGameplayLevels);
+            int calculatedIndex = WrapIndex(adjustedProgress, totalGameplayLevels);
 
             return (_levels[calculatedIndex - 1], calculatedIndex);
         }
 
-        private int ClampOrWrapIndex(int progressValue, int totalAvailable)
-        {
-            if (progressValue <= totalAvailable)
-                return progressValue;
-
-            if (_useRandomSelection)
-                return GetRandomIndex(totalAvailable);
-
-            return WrapIndex(progressValue, totalAvailable);
-        }
-
-        private int GetRandomIndex(int maxRange) => Random.Range(1, maxRange + 1);
-
         private int WrapIndex(int value, int wrapLimit)
         {
+            if (wrapLimit <= 0) return 1;
             int remainder = value % wrapLimit;
             return remainder == 0 ? wrapLimit : remainder;
         }
@@ -112,8 +154,6 @@ namespace SerapKeremGameKit._Managers
                 SerapKeremGameKit._InputSystem.InputHandler.Instance.UnlockInput();
             }
             StateManager.Instance.SetLoading();
-            // UI: update level text on load
-            //UIManager.Instance?.RefreshLevelNumber();
             StartLevel();
         }
 
@@ -125,16 +165,24 @@ namespace SerapKeremGameKit._Managers
         {
             ActiveLevelInstance.Play();
             StateManager.Instance.SetOnStart();
-            // UI: show in-game UI and refresh text
-            //UIManager.Instance?.ShowInGameUI();
-            //UIManager.Instance?.RefreshLevelNumber();
         }
 
         public void RetryLevel()
         {
             TerminateCurrentLevel();
-            var retryTarget = _levels[ProcessedLevelIndex - 1];
-            InstantiateAndBegin(retryTarget);
+            if (_useProceduralInfiniteLevels)
+            {
+                InstantiateAndBeginProcedural(ActiveLevelNumber);
+            }
+            else if (_levels != null && _levels.Length > 0)
+            {
+                var retryTarget = _levels[Mathf.Clamp(ProcessedLevelIndex - 1, 0, _levels.Length - 1)];
+                InstantiateAndBegin(retryTarget);
+            }
+            else
+            {
+                InstantiateAndBeginProcedural(ActiveLevelNumber);
+            }
         }
 
         public void RestartLevel()
@@ -146,8 +194,6 @@ namespace SerapKeremGameKit._Managers
         public void CleanCurrentLevel()
         {
             TerminateCurrentLevel();
-            // UI: hide gameplay UI if needed
-            //UIManager.Instance?.HideInGameUI();
         }
 
         public void IncreaseLevelNumber()
@@ -158,7 +204,6 @@ namespace SerapKeremGameKit._Managers
 
         private void TerminateCurrentLevel()
         {
-            // notify state if needed
             if (ActiveLevelInstance != null)
                 Destroy(ActiveLevelInstance.gameObject);
         }
@@ -171,10 +216,6 @@ namespace SerapKeremGameKit._Managers
         {
             if (!ValidateGameStateForEvents()) return;
             StateManager.Instance.SetOnWin();
-            // Example: level-based coin reward
-            // Currency.Currency.Add(ActiveLevelNumber * 5);
-            // UI: show win panel
-            //UIManager.Instance?.ShowWinScreen();
         }
 
         [Button("Test LevelWin")]
@@ -182,9 +223,6 @@ namespace SerapKeremGameKit._Managers
         {
             if (!ValidateGameStateForEvents()) return;
             StateManager.Instance.SetOnWin();
-            // Example: move-based bonus
-            // int bonus = Mathf.Max(0, 10 - moveCount);
-            // Currency.Currency.Add(bonus);
         }
 
         [Button("Test LevelLose")]
@@ -192,8 +230,6 @@ namespace SerapKeremGameKit._Managers
         {
             if (!ValidateGameStateForEvents()) return;
             StateManager.Instance.SetOnLose();
-            // UI: show fail panel
-            //UIManager.Instance?.ShowFailScreen();
         }
 
         private bool ValidateGameStateForEvents()
@@ -207,7 +243,7 @@ namespace SerapKeremGameKit._Managers
 
         private void PerformInitialValidation()
         {
-            if (_levels == null || _levels.Length == 0)
+            if (!_useProceduralInfiniteLevels && (_levels == null || _levels.Length == 0))
                 TraceLogger.LogWarning($"{name}: Levels array is not configured.", this);
         }
 
@@ -231,9 +267,10 @@ namespace SerapKeremGameKit._Managers
 
         public Level GetLevelByNumber(int levelNumber)
         {
-            int gameplayIndex = levelNumber;
+            if (_useProceduralInfiniteLevels) return null;
 
-            if (gameplayIndex <= 0 || gameplayIndex > _levels.Length) return null;
+            int gameplayIndex = levelNumber;
+            if (_levels == null || gameplayIndex <= 0 || gameplayIndex > _levels.Length) return null;
 
             return _levels[gameplayIndex - 1];
         }
